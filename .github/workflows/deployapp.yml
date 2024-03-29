@@ -8,9 +8,8 @@ on:
     paths-ignore:
       - 'production'
   pull_request:
-    types: [opened, synchronize]
+    types: [closed]
     branches:
-      - master
       - production
 
 jobs:
@@ -29,7 +28,8 @@ jobs:
 
   deploy_to_github_pages:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/production'
+    needs: test
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
