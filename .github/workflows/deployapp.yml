@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - '*'
+    # Exclude direct pushes to master and production branches
+    paths-ignore:
+      - 'production'
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - master
+      - production
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm coverage
+
+  deploy_to_github_pages:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/production'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and deploy to GitHub Pages
+        run: |
+          npm install
+          npm run build
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git checkout gh-pages
+          git pull origin gh-pages --rebase
+          cp -r build/* .
+          git add .
+          git commit -m "Deploy to GitHub Pages"
+          git push origin gh-pages
