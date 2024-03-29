@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm coverage
+        run: npm run coverage
 
   deploy_to_github_pages:
     runs-on: ubuntu-latest
